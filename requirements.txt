@@ -1,0 +1,8 @@
+aiokafka
+cx_Oracle
+kafka-python
+openpyxl
+pandas
+pymongo
+requests
+xlrd==1.2.0

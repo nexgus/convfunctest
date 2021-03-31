@@ -3,6 +3,7 @@ bin/
 include/
 lib/
 share/
+ken_it-ot-producer/
 
 pyvenv.cfg
 works/data.xlsx

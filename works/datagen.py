@@ -1,17 +1,29 @@
+import argparse
 import numpy as np
 import pandas as pd
 
 from datetime import datetime
 from pymongo import MongoClient
 
+parser = argparse.ArgumentParser(
+    formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+parser.add_argument("--mongo", "-m", type=str, default="mongo:27017",
+                    help="MongoDB server IP:PORT")
+parser.add_argument("--input", "-i", type=str, default="./it_data.xlsx",
+                    help="Path to IT example data (Excel) file.")
+parser.add_argument("--output", "-o", type=str, default="./data.xlsx",
+                    help="Path to output dataset (Excel) file.")
+args = parser.parse_args()
+
+
 # Get all valid DCT station IDs
-mongo = MongoClient("mongodb://mongo:27017/")
+mongo = MongoClient(f"mongodb://{args.mongo}")
 valid_dct = []
 for doc in mongo.nexmasa.dcts.find({}):
     valid_dct.append(doc["_id"])
 
 # Read IT example data
-df = pd.read_excel("./it_data.xlsx", sheet_name="Sheet1")
+df = pd.read_excel(args.input, sheet_name="Sheet1")
 df["STATION_NUMBER"] = df["STATION_NUMBER"].astype(str)
 
 sn_list = []
@@ -169,4 +181,4 @@ for idx, row in df_new.iterrows():
                 df_new.at[idx, "ot_val"] = prv_ot_val
 print()
 
-df_new.to_excel("data.xlsx", index=False)
+df_new.to_excel(args.output, index=False)

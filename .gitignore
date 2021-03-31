@@ -5,3 +5,6 @@ lib/
 share/
 
 pyvenv.cfg
+works/data.xlsx
+works/it_data_20201223.xlsx
+works/test.py

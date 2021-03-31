@@ -13,6 +13,8 @@ parser.add_argument("--input", "-i", type=str, default="./it_data.xlsx",
                     help="Path to IT example data (Excel) file.")
 parser.add_argument("--output", "-o", type=str, default="./data.xlsx",
                     help="Path to output dataset (Excel) file.")
+parser.add_argument("--minimum", "-M", type=float, default=60.0,
+                    help="Minimum interval between two IT event with the same DCT ID.")
 args = parser.parse_args()
 
 
@@ -60,7 +62,7 @@ for sn in duplicated:
         t_cur = df.iloc[cur_index].IN_TIME
         t_nxt = df.iloc[nxt_index].IN_TIME
         t_diff = (t_nxt - t_cur).total_seconds()
-        if t_diff < 60:
+        if t_diff < args.minimum:
             df.at[cur_index, "ignore"] = True
 
 df = df.drop(["duplicated"], axis=1)

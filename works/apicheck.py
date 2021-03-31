@@ -69,7 +69,7 @@ def main(args):
         print(f"[{idx+1}/{total}] {sn} -> ", end="", flush=True)
 
         # Generate URL for this serial number
-        url = f"{Default.api}/{sn}"
+        url = f"{args.api}/{sn}"
         if url.startswith("/"):
             url = url[1:]
         url = f"http://{args.host}:{args.port}/{url}"
@@ -161,6 +161,8 @@ if __name__ == "__main__":
                         help="API server host address.")
     parser.add_argument("--port", "-p", type=int, default=Default.port,
                         help="API server port number.")
+    parser.add_argument("--api", "-a", type=str,
+                        default=Default.api, help="API path.")
     parser.add_argument("--excel", "-x", type=str, default=Default.excel,
                         help="Path to Excel data file.")
     args = parser.parse_args()

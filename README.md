@@ -2,7 +2,7 @@
 
 ## Prerequisties
 1.  MongoDB server, 必須有一個 database 叫做 `nexmasa`, 且 `nexmasa` 內有兩個 collections 分別為 `dcts` 與 `sensormap`
-1.  Oracle Database, 以建好一個 table 名為 `conv_it_test`, 且設好 CDC/logminer.
+1.  Oracle Database, 已建好一個 table 名為 `conv_it_test`, 且設好 CDC/logminer.
 1.  Kafka broker (單機或叢集)
 1.  Python 3.6 或更新的版本
 
@@ -10,6 +10,7 @@
 ### datagen.py
 ```
 usage: datagen.py [-h] [--mongo MONGO] [--input INPUT] [--output OUTPUT]
+                  [--minimum MINIMUM]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -21,6 +22,9 @@ optional arguments:
   --output OUTPUT, -o OUTPUT
                         Path to output dataset (Excel) file. (default:
                         ./data.xlsx)
+  --minimum MINIMUM, -M MINIMUM
+                        Minimum interval between two IT event with the same
+                        DCT ID. (default: 60.0)
 ```
 
 ### itgen.py
@@ -67,12 +71,14 @@ optional arguments:
 
 ### apicheck.py
 ```
-usage: apicheck.py [-h] [--host HOST] [--port PORT] [--excel EXCEL]
+usage: apicheck.py [-h] [--host HOST] [--port PORT] [--api API]
+                   [--excel EXCEL]
 
 optional arguments:
   -h, --help            show this help message and exit
   --host HOST, -H HOST  API server host address. (default: 10.1.5.41)
   --port PORT, -p PORT  API server port number. (default: 80)
+  --api API, -a API     API path. (default: /api/convergence/findRecord)
   --excel EXCEL, -x EXCEL
                         Path to Excel data file. (default: ./data.xlsx)
 ```
@@ -99,14 +105,14 @@ optional arguments:
     ```
 1.  建立資料集
     ```bash
-    python datagen.py
+    python datagen.py [--mongo ip_or_domain_name:port]
     ```
 1.  建立 IT/OT 資料
     ```bash
-    python itgen.py
-    python otgen.py
+    python itgen.py [-h oracle_ip_domain_name] [-p oracle_port] [-U username] [-P password]
+    python otgen.py [--broker IP:PORT] [--topic your_topic]
     ```
 1.  檢查 API 結果
     ```bash
-    python apicheck.py
+    python apicheck.py 
     ```

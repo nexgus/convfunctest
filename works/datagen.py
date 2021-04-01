@@ -1,14 +1,17 @@
 import argparse
+import json
 import numpy as np
+import requests
 import pandas as pd
 
 from datetime import datetime
-from pymongo import MongoClient
 
 parser = argparse.ArgumentParser(
     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument("--mongo", "-m", type=str, default="mongo:27017",
-                    help="MongoDB server IP:PORT")
+parser.add_argument("--convdbman", type=str, default="api.conv-db-man.svc.cluster.local:80",
+                    help="ConvDBManAPI IP:PORT")
+parser.add_argument("--convsenormap", type=str, default="api.conv-sensormap.svc.cluster.local:80",
+                    help="ConvSensorMapAPI IP:PORT")
 parser.add_argument("--input", "-i", type=str, default="./it_data.xlsx",
                     help="Path to IT example data (Excel) file.")
 parser.add_argument("--output", "-o", type=str, default="./data.xlsx",
@@ -19,10 +22,8 @@ args = parser.parse_args()
 
 
 # Get all valid DCT station IDs
-mongo = MongoClient(f"mongodb://{args.mongo}")
-valid_dct = []
-for doc in mongo.nexmasa.dcts.find({}):
-    valid_dct.append(doc["_id"])
+resp = requests.get(f"http://{args.convdbman}/api/v1/dct")
+valid_dct = list(json.loads(resp.content.decode("utf-8")).keys())
 
 # Read IT example data
 df = pd.read_excel(args.input, sheet_name="Sheet1")
@@ -118,9 +119,13 @@ for _, row in df.iterrows():
                  LOG_SRC=row.LOG_SRC,
                  ignore=row.ignore)
 
-        dct = mongo.nexmasa.dcts.find_one({"_id": dct_id})
+        resp = requests.get(f"http://{args.convdbman}/dct/{dct_id}")
+        dct = json.loads(resp.content.decode("utf-8"))
         workstations = dct["workstations"]
-        sensormap = mongo.nexmasa.sensormap.find_one({"_id": dct_id})
+
+        resp = requests.get(f"http://{args.convsensormap}/record/{dct_id}")
+        sensormap = json.loads(resp.content.decode("utf-8"))
+
         for ws_id in workstations:
             offset = sensormap["work_station"][ws_id]["offset"]
             ts = ts0 + offset
